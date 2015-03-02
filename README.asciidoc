@@ -1,0 +1,71 @@
+= modconf: Modem Configuration Manager
+
+Command line modem configuration file generator.
+
+Tested in Python 3.4.
+
+Made to automate someone's job.
+
+= Usage
+
+Let's say you want to generate a modem configuration for the following:
+
+  * modem: m
+  * username: user
+  * password: userpass
+  * superadmin password: sapass
+
+You'd run this to generate the appropriate config:
+
+----
+modconf.py m user userpass sapass
+----
+
+And you'd find your file at +output/user_m.cfg+.
+
+Don't forget to check +settings.ini+ for more options/to set your constants!
+
+----
+modconf.py: modem configuration
+
+Usage:
+  modconf.py <modem_type> <username> <password> <superadmin_password>
+  modconf.py --supported
+  modconf.py (-h | --help)
+  modconf.py --version
+
+Options:
+  --supported   Show supported modems.
+  -h --help     Show this screen.
+  --version     Show version.
+
+----
+
++<modem_type>+ can be +all+!
+
+= Setup
+
+In the same directory as _modconf.py_, execute (in terminal):
+
+----
+pip install -r requirements.txt
+----
+
+== Caveat
+
+The machine I was running had Perl's pip installed. I was initially testing this on a Windows machine, so I used the full path to pip via Command Prompt:
+
+----
+C:\Python34\Scripts\pip.exe install -r requirements.txt
+----
+
+= Supported Modem Types
+
+  * bullet
+  * bullethp
+  * loco
+  * m
+  * nano
+  * pico
+  * ps
+
