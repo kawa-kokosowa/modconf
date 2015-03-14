@@ -28,10 +28,13 @@ from random import randint
 import crypt  # pure-python override (we generate on Windows, too!)
 import docopt
 
-__VERSION__ = "0.1"
+__VERSION__ = "0.2"
 
 
+# should actually be glob results of config template directory
+# sans file extension
 SUPPORTED_MODEM_TYPES = (
+                         '*',  # MUST be first!
                          'bullet',
                          'bullethp',
                          'loco',
@@ -39,7 +42,6 @@ SUPPORTED_MODEM_TYPES = (
                          'nano',
                          'pico',
                          'ps',
-                         'all',
                         )
 
 
@@ -68,55 +70,61 @@ if __name__ == '__main__':
     superadmin_password = arguments['<superadmin_password>']
     salted_superadmin_password = crypt.crypt(superadmin_password, salt)
     
-    # read corresponding config template for <modem_type> into string
-    modem_config_template_dir = config['general']['modem_config_template_dir']
-    modem_config_template_filename = arguments['<modem_type>'] + '.cfg'
-    modem_config_template_path = os.path.join(modem_config_template_dir,
-                                              modem_config_template_filename)
+    if arguments['<modem_type>'] == '*':
+        configs_to_generate = SUPPORTED_MODEM_TYPES[1:]
+    else:
+        configs_to_generate = argument['modem_type']
 
-    try:
-    
-        with open(modem_config_template_path) as f:
-            modem_config_template_contents = f.read()
-    
-    except IOError:
-        sys.exit(modem_config_template_path + " doesn't exist!")
+    for modem_type in configs_to_generate:
+        # read corresponding config template for <modem_type> into string
+        modem_config_template_dir = config['general']['modem_config_template_dir']
+        modem_config_template_filename = modem_type + '.cfg'
+        modem_config_template_path = os.path.join(modem_config_template_dir,
+                                                  modem_config_template_filename)
 
-    # create a new configuration by interpolating dictionary of
-    # substitutions with the config template.
-    #
-    # users.1.name={superadmin_username}
-    # users.1.password={superadmin_password}
-    # users.2.name={username}
-    # users.2.password={password}
-    # resolv.host.1.name={username}
-    # wpasupplicant.profile.1.network.1.anonymous_identity={username}
-    # wpasupplicant.profile.1.network.1.identity={username}
-    # wpasupplicant.profile.1.network.1.password={unsalted_password}
-    superadmin_username = config['general']['superadmin_username']
-    substitutions = {
-                     'username': arguments['<username>'],
-                     'unsalted_password': arguments['<password>'],
-                     'password': salted_password,
-                     'superadmin_username': superadmin_username,
-                     'superadmin_password': salted_superadmin_password,
-                    }
-    new_config_output = modem_config_template_contents.format(**substitutions)
+        try:
+        
+            with open(modem_config_template_path) as f:
+                modem_config_template_contents = f.read()
+        
+        except IOError:
+            sys.exit(modem_config_template_path + " doesn't exist!")
 
-    config_output_filename = (arguments['<username>'] + '_' +
-                              arguments['<modem_type>'] + '.cfg')
-    config_output_path = os.path.join(config['general']['output_dir'],
-                                      config_output_filename)
+        # create a new configuration by interpolating dictionary of
+        # substitutions with the config template.
+        #
+        # users.1.name={superadmin_username}
+        # users.1.password={superadmin_password}
+        # users.2.name={username}
+        # users.2.password={password}
+        # resolv.host.1.name={username}
+        # wpasupplicant.profile.1.network.1.anonymous_identity={username}
+        # wpasupplicant.profile.1.network.1.identity={username}
+        # wpasupplicant.profile.1.network.1.password={unsalted_password}
+        superadmin_username = config['general']['superadmin_username']
+        substitutions = {
+                         'username': arguments['<username>'],
+                         'unsalted_password': arguments['<password>'],
+                         'password': salted_password,
+                         'superadmin_username': superadmin_username,
+                         'superadmin_password': salted_superadmin_password,
+                        }
+        new_config_output = modem_config_template_contents.format(**substitutions)
 
-    # if the output directory doesn't exist, create it!
-    if not os.path.exists(config['general']['output_dir']):
-        os.makedirs(config['general']['output_dir'])
+        config_output_filename = (arguments['<username>'] + '_' +
+                                  modem_type + '.cfg')
+        config_output_path = os.path.join(config['general']['output_dir'],
+                                          config_output_filename)
 
-    # Done! Write new config to output path!
-    try:
+        # if the output directory doesn't exist, create it!
+        if not os.path.exists(config['general']['output_dir']):
+            os.makedirs(config['general']['output_dir'])
 
-        with open(config_output_path, 'w') as f:
-            f.write(new_config_output)
+        # Done! Write new config to output path!
+        try:
 
-    except IOError:
-        sys.exit('Cannot output to: ' + config_output_path)
+            with open(config_output_path, 'w') as f:
+                f.write(new_config_output)
+
+        except IOError:
+            sys.exit('Cannot output to: ' + config_output_path)
