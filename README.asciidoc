@@ -41,7 +41,7 @@ Options:
 
 ----
 
-+<modem_type>+ can be +*+ (wildcard)! Using the wildcard a your +<modem_type>+ will generate a config for each supported modem.
++<modem_type>+ can be +*+ (wildcard)! Using the wildcard as your +<modem_type>+ will generate a config for each supported modem.
 
 = Setup
 
