@@ -9,6 +9,7 @@
 Usage:
   modconf.py <username> <password> <superadmin_password> [--mtype=MODEMTYPE]
   modconf.py --supported
+  modconf.py --wizard
   modconf.py --clean
   modconf.py (-h | --help)
   modconf.py --version
@@ -17,6 +18,7 @@ Arguments:
   MODEMTYPE      See --supported.
 
 Options:
+  --wizard       Interactive mode, you will be prompted for args.
   --mtype=MTYPE  Modem type to generate config for. Default: ALL.
   --supported    Show supported modems.
   --clean        Remove all files in output directory.
@@ -36,7 +38,7 @@ import docopt
 
 import crypt  # local pure-python; generate passwords on Windows
 
-__VERSION__ = "0.4"
+__VERSION__ = "0.5"
 
 
 # should actually be glob results of config template directory
@@ -60,6 +62,26 @@ if __name__ == '__main__':
     # get modconf settings
     config = configparser.ConfigParser()
     config.read('settings.ini')
+
+    # collect arguments interactively
+    if arguments['--wizard']:
+        # TODO: actual sanitization?
+        modem_type = input('modem type (hit enter for default [ALL]):')
+        modem_type = modem_type or 'ALL'
+
+        username = None
+        while not username: username = input('userame: ')
+
+        password = None
+        while not password: password = input('password: ')
+
+        sapassword = None
+        while not sapassword: sapassword = input('superadmin password: ')
+
+        arguments['--mtype'] = modem_type
+        arguments['<username>'] = username
+        arguments['<password>'] = password
+        arguments['<superadmin_password>'] = sapassword
 
     # are we simply displaying supported modems?
     if arguments['--supported']:
