@@ -1,0 +1,1 @@
+This is the Windows x86 standalone executable build, tested in Windows 7.
