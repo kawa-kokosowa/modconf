@@ -38,7 +38,7 @@ import docopt
 
 import crypt  # local pure-python; generate passwords on Windows
 
-__VERSION__ = "0.5"
+__VERSION__ = "0.5.1"
 
 
 # should actually be glob results of config template directory
