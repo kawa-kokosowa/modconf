@@ -42,7 +42,7 @@ Let's say you want to generate the following config _only_ for the _pico_ modem 
 You just need to specify the +--mtype+ flag like such:
 
 ----
-python modconf.py bob bobpass sapass --mtype=pico
+python modconf.py frank frankpass fancysapass --mtype=pico
 ----
 
 And you'd find your file at +output/frank_pico.cfg+.
