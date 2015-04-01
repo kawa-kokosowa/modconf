@@ -1,0 +1,1 @@
+python winsetup.py py2exe
