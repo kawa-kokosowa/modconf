@@ -55,6 +55,7 @@ modconf.py: modem configuration
 Usage:
   modconf.py <username> <password> <superadmin_password> [--mtype=MODEMTYPE]
   modconf.py --supported
+  modconf.py --wizard
   modconf.py --clean
   modconf.py (-h | --help)
   modconf.py --version
@@ -63,6 +64,7 @@ Arguments:
   MODEMTYPE      See --supported.
 
 Options:
+  --wizard       Interactive mode, you will be prompted for args.
   --mtype=MTYPE  Modem type to generate config for. Default: ALL.
   --supported    Show supported modems.
   --clean        Remove all files in output directory.
@@ -72,6 +74,8 @@ Options:
 ----
 
 Optional +--mtype+ can be +ALL+ (but this is already the default behavior)! Not defining, or using +ALL+ as +--mtype+ will generate a config for each supported modem.
+
++modconf.py --wizard+ will launch an interactive prompt for generating config(s).
 
 = Setup
 
