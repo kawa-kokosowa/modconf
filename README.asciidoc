@@ -4,6 +4,8 @@ Python 3 command line (CLI) modem configuration file generator. Created for _US 
 
 Tested in Python 3.4 on FreeBSD.
 
+For the Windows standalone executable, see the link:https://github.com/lillian-lemmer/modconf/tree/win32-standalone[win32-standalone branch].
+
 = Usage
 
 Generate modem configs for _all_ modem types, with the following settings:
