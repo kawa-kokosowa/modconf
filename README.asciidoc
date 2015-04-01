@@ -1,27 +1,51 @@
 = modconf: Modem Configuration Manager
 
-Command line modem configuration file generator.
+Python 3 command line (CLI) modem configuration file generator. Created for _US Internet_, for modem deployment automation.
 
-Tested in Python 3.4.
-
-Made to automate someone's job.
+Tested in Python 3.4 on FreeBSD.
 
 = Usage
 
-Let's say you want to generate a modem configuration for the following:
+Generate modem configs for _all_ modem types, with the following settings:
 
-  * modem: m
-  * username: user
-  * password: userpass
+  * username: bob
+  * password: bobpass
   * superadmin password: sapass
 
-You'd run this to generate the appropriate config:
-
 ----
-modconf.py m user userpass sapass
+python modconf.py bob bobpass sapass
 ----
 
-And you'd find your file at +output/user_m.cfg+.
+The above will output the configs to the +output_dir+ defined in _settings.ini_. The above command should generate files into +output_dir+ like follows:
+
+----
+$ ls output
+bob_bullet.cfg		bob_loco.cfg		bob_nano.cfg		bob_ps.cfg
+bob_bullethp.cfg	bob_m.cfg		bob_pico.cfg
+----
+
+Let's delete the +output_dir+, so we can get to generating other configs:
+
+----
+$ python modconf.py --clean
+$ ls output
+ls: output: No such file or directory
+----
+
+Let's say you want to generate the following config _only_ for the _pico_ modem type:
+
+  * modem type: pico
+  * username: frank
+  * password: frankpass
+  * superadmin password: fancysapass
+
+You just need to specify the +--mtype+ flag like such:
+
+----
+python modconf.py bob bobpass sapass --mtype=pico
+----
+
+And you'd find your file at +output/frank_pico.cfg+.
 
 Don't forget to check +settings.ini+ for more options/to set your constants!
 
@@ -29,19 +53,25 @@ Don't forget to check +settings.ini+ for more options/to set your constants!
 modconf.py: modem configuration
 
 Usage:
-  modconf.py <modem_type> <username> <password> <superadmin_password>
+  modconf.py <username> <password> <superadmin_password> [--mtype=MODEMTYPE]
   modconf.py --supported
+  modconf.py --clean
   modconf.py (-h | --help)
   modconf.py --version
 
+Arguments:
+  MODEMTYPE      See --supported.
+
 Options:
-  --supported   Show supported modems.
-  -h --help     Show this screen.
-  --version     Show version.
+  --mtype=MTYPE  Modem type to generate config for. Default: ALL.
+  --supported    Show supported modems.
+  --clean        Remove all files in output directory.
+  -h --help      Show this screen.
+  --version      Show version.
 
 ----
 
-+<modem_type>+ can be +*+ (wildcard)! Using the wildcard as your +<modem_type>+ will generate a config for each supported modem.
+Optional +--mtype+ can be +ALL+ (but this is already the default behavior)! Not defining, or using +ALL+ as +--mtype+ will generate a config for each supported modem.
 
 = Setup
 

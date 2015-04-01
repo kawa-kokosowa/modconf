@@ -7,34 +7,42 @@
 """modconf.py: modem configuration
 
 Usage:
-  modconf.py <modem_type> <username> <password> <superadmin_password>
+  modconf.py <username> <password> <superadmin_password> [--mtype=MODEMTYPE]
   modconf.py --supported
+  modconf.py --clean
   modconf.py (-h | --help)
   modconf.py --version
 
+Arguments:
+  MODEMTYPE      See --supported.
+
 Options:
-  --supported   Show supported modems.
-  -h --help     Show this screen.
-  --version     Show version.
+  --mtype=MTYPE  Modem type to generate config for. Default: ALL.
+  --supported    Show supported modems.
+  --clean        Remove all files in output directory.
+  -h --help      Show this screen.
+  --version      Show version.
 
 """
 
 import os
 import sys
 import string
+import shutil
 import configparser
 from random import randint
 
-import crypt  # pure-python override (we generate on Windows, too!)
 import docopt
 
-__VERSION__ = "0.2"
+import crypt  # local pure-python; generate passwords on Windows
+
+__VERSION__ = "0.4"
 
 
 # should actually be glob results of config template directory
 # sans file extension
 SUPPORTED_MODEM_TYPES = (
-                         '*',  # MUST be first!
+                         'ALL',  # MUST be first!
                          'bullet',
                          'bullethp',
                          'loco',
@@ -48,32 +56,44 @@ SUPPORTED_MODEM_TYPES = (
 if __name__ == '__main__':
     arguments = docopt.docopt(__doc__, version='modconf ' + __VERSION__)
     modem_types_supported_readable = ', '.join(SUPPORTED_MODEM_TYPES)
-    
+
+    # get modconf settings
+    config = configparser.ConfigParser()
+    config.read('settings.ini')
+
     # are we simply displaying supported modems?
     if arguments['--supported']:
         print('Modem types supported: ' + modem_types_supported_readable)
         sys.exit()
-    
+
+    # are we cleaning the output_directory set in config?
+    elif arguments['--clean']:
+        output_dir = os.path.abspath(config['general']['output_dir'])
+
+        try:
+            shutil.rmtree(output_dir)
+        except FileNotFoundError:
+            sys.exit('Does not exist: ' + output_dir)
+
+        sys.exit()
+
     # check validity of declared modem type
-    if arguments['<modem_type>'] not in SUPPORTED_MODEM_TYPES:
-        message = ('Modem type not supported: ' + arguments['<modem_type>'] +
+    if arguments['--mtype'] and arguments['--mtype'] not in SUPPORTED_MODEM_TYPES:
+        message = ('Modem type not supported: ' + arguments['--mtype'] +
                    ' (must be one of: ' + modem_types_supported_readable + ')')
-    
-    # get modconf settings
-    config = configparser.ConfigParser()
-    config.read('settings.ini')
-    
+        sys.exit(message)
+
     # salt the user and superadmin passwords
     salt_chars = './' + string.ascii_letters + string.digits
     salt = salt_chars[randint(0, 63)] + salt_chars[randint(0, 63)]
     salted_password = crypt.crypt(arguments['<password>'], salt)
     superadmin_password = arguments['<superadmin_password>']
     salted_superadmin_password = crypt.crypt(superadmin_password, salt)
-    
-    if arguments['<modem_type>'] == '*':
+
+    if arguments['--mtype'] == 'ALL' or arguments['--mtype'] is None:
         configs_to_generate = SUPPORTED_MODEM_TYPES[1:]
     else:
-        configs_to_generate = argument['modem_type']
+        configs_to_generate = (arguments['--mtype'],)
 
     for modem_type in configs_to_generate:
         # read corresponding config template for <modem_type> into string
@@ -83,10 +103,10 @@ if __name__ == '__main__':
                                                   modem_config_template_filename)
 
         try:
-        
+
             with open(modem_config_template_path) as f:
                 modem_config_template_contents = f.read()
-        
+
         except IOError:
             sys.exit(modem_config_template_path + " doesn't exist!")
 
@@ -128,3 +148,4 @@ if __name__ == '__main__':
 
         except IOError:
             sys.exit('Cannot output to: ' + config_output_path)
+
